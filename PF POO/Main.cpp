@@ -21,12 +21,11 @@ HWND hText = 0;
 bool ableToCheck = false;
 HDC hContextoVentana;
 Scene *scene;
-GamePadRR *gamPad;
+GamePadRR *player1;
 bool renderiza = false;
 unsigned int dayTimer = 0;
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	HWND hwndVentana;
 	WNDCLASSEX wc;
 
@@ -41,7 +40,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	RegisterClassEx(&wc);//Registra una clase de ventana para su uso subsecuente en llamadas a las funciones CreateWindow o CreateWindowEx
 	RECT wr = { 0, 0, 1080, 720 };
 	AdjustWindowRect(&wr, WS_OVERLAPPEDWINDOW, FALSE);//Calcula el tamaño necesario del rectángulo de la ventana.
-
 	//Se crea la ventana definida previamente.
 	hwndVentana = CreateWindowEx(NULL,//estilo extendido de ventana
 		"DavidWindow",//puntero al nombre de la clase registrada *visto arriba*
@@ -55,54 +53,72 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		NULL,//manejador del menu o identificador de ventana hija
 		hInstance,//manejador de la instancia de la aplicación
 		NULL);//puntero a los datos de creación de la ventana
-
 	ShowWindow(hwndVentana, nCmdShow);//Muestra la ventana creada
-
-	
 	ShowWindow(hInfo, SW_SHOW);
 	
 	glewInit();//Inicializa glew
-
 	//Instancia de la escena
 	scene = new Scene(hwndVentana);
-
-	gamPad = new GamePadRR(1);
+	player1 = new GamePadRR(1);
 	ableToCheck = true;
-
 	//Crear un timer con el valor especificado de time-out
 	SetTimer(hwndVentana,//Manejador de ventana que recibirá los mensajes del timer
 		Timer1,//identificador del timer
 		30,//valor de time-out
 		NULL);//dirección del procedimiento de timer
-
 	MSG msg = { 0 };
-	while (TRUE)
-	{
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-		{
+	while (TRUE) {
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
-
 			if (msg.message == WM_QUIT)
 				break;
 		}
-		else{
-			if (renderiza){			
+		else {
+			if (renderiza) {			
 				scene->render(hContextoVentana);
 				renderiza = false;
-				if (gamPad->IsConnected()){
-					//PISTA: Algo puedes lograr aqui con ayuda del autocompletador
+				if (player1->IsConnected()){
+					if (player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP) {
+						scene->move('f');
+						renderiza = true;
+					}
+					if (player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) {
+						scene->move('b');
+						renderiza = true;
+					}
+					if (player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) {
+						scene->move('r');
+						renderiza = true;
+					}
+					if (player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) {
+						scene->move('l');
+						renderiza = true;
+					}
+					if (player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_Y) {
+						scene->turnUp();
+						renderiza = true;
+					}
+					if (player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_A) {
+						scene->turnDown();
+						renderiza = true;
+					}
+					if (player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_X) {
+						scene->turnLeft();
+						renderiza = true;
+					}
+					if (player1->GetState().Gamepad.wButtons & XINPUT_GAMEPAD_B) {
+						scene->turnRight();
+						renderiza = true;
+					}
 				}
 			}
 		}
 	}
-
 	return msg.wParam;
-
 }
 
-LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
+LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
 	static HGLRC hContextoGL;
 	static HDC hContextoAux;
 	int ancho, alto;
@@ -114,8 +130,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	char edy[6] = "";
 	char ec[80] = "";
 
-	switch (message)
-	{
+	switch (message) {
 	case WM_CREATE:
 		hContextoAux = GetDC(hWnd);
 		hContextoVentana = hContextoAux;
@@ -125,10 +140,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		srand(time(NULL));
 		break;
 	case WM_KEYDOWN:
-		switch (wParam)
-		{
-		case VK_F1:
-		{
+		switch (wParam) {
+		case VK_F1: {
 			string info = "X: " + to_string(scene->px) + " Y: " + to_string(scene->py)+ " Z: " +to_string(scene->pz);
 			MessageBox(hWnd,info.c_str(),"INFO",MB_OK);
 		}
@@ -167,23 +180,20 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			return 0;
 		}
 		break;
-	case WM_TIMER:
-	{
+	case WM_TIMER: {
 		renderiza = true;
 	}
-		break;
-	case WM_DESTROY:
-	{
+	break;
+	case WM_DESTROY: {
 		KillTimer(hWnd, Timer1);
 		delete scene;
 		wglMakeCurrent(hContextoVentana, NULL);
 		wglDeleteContext(hContextoGL);
 		PostQuitMessage(0);
 		return 0;
-	} break;
-
-	case WM_SIZE:
-	{
+	} 
+	break;
+	case WM_SIZE: {
 		alto = HIWORD(lParam);
 		ancho = LOWORD(lParam);
 		if (alto == 0)
@@ -197,14 +207,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	}
 	break;
 	}
-
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-void DefPixelFormat(HDC hDC)
-{
+void DefPixelFormat(HDC hDC) {
 	int bestmatch;
-
 	static PIXELFORMATDESCRIPTOR pfd = {
 		sizeof(PIXELFORMATDESCRIPTOR), //tamaño de la estructura
 		1, //numero de version
@@ -223,7 +230,6 @@ void DefPixelFormat(HDC hDC)
 		0, //reservado
 		0, 0, 0 //mascaras de capas ignoradas
 	};
-
 	bestmatch = ChoosePixelFormat(hDC, &pfd);
 	SetPixelFormat(hDC, bestmatch, &pfd);
 }

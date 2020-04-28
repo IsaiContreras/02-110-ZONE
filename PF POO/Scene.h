@@ -12,24 +12,14 @@
 #include "Camera.h"
 #include <thread>
 #include <vector>
-
 #define BILLSIZE 50
-
 //BIENVENIDO AL ARCHIVO MAS IMPORTANTE DE TU PROYECTO
-
-void loadModA(EDXFramework::Model **mod, string dirMod, string dirTex, bool mode) {
-	*mod = new EDXFramework::Model(dirMod, dirTex, mode);
-}
-
-class Scene : public Camera
-{
+class Scene : public Camera {
 public:
-
 	HWND hWnd = 0;
 
 	short int skyIndex, lightIndex;
 	float skyRotation;
-	float gunRotation;
 
 	SkyDome *skyDome = new SkyDome(hWnd, 32, 32, 500, L"Imagenes//cloudysky.jpg");
 	Terrain *terrain = new Terrain(hWnd, L"Imagenes//mainTerrain.bmp", L"Imagenes//texturaCesped.jpg", L"Imagenes//texturaCesped.jpg", 936, 936);
@@ -49,21 +39,13 @@ public:
 	EDXFramework::Model* Extintor;
 	EDXFramework::Model* Lamp;
 	EDXFramework::Model* KeyItem;
-
 	EDXFramework::Model* Tower;
 	EDXFramework::Model* Building;
-
 	EDXFramework::Model* Enemy;
 	EDXFramework::Model* Enemy2;
-
 	EDXFramework::Model* PlayerHands;
 
 	Billboard *billBoard[BILLSIZE];
-
-	/*static int loadModel(EDXFramework::Model* Gun) {
-		Gun = new EDXFramework::Model("Modelos//Arma//Cyborg_Riffle.obj", "Modelos//Arma//Cyborg_Riffle_D.bmp", 1);
-		return 1;
-	}*/
 
 	Scene(HWND hWnd)
 	{
@@ -99,47 +81,14 @@ public:
 		Tower = new EDXFramework::Model("Modelos//Tower//wooden watch tower2.obj", "Modelos//Tower//Wood_Tower_Col.bmp", 1);
 		Gate = new EDXFramework::Model("Modelos//Gate//Gate.obj", "Modelos//Gate//PLATEOX2copy.bmp", 1);
 
-
-		/*thread models[18];
-		models[0] = thread(loadModA, &KeyItem, "Modelos//KeyItem//KeyItem.obj", "Modelos//KeyItem//KeyItem.bmp", 1); 
-		models[1] = thread(loadModA, &Car, "Modelos//Car//mtCar.obj", "Modelos//Car//car.bmp", 1);
-		models[2] = thread(loadModA, &Enemy, "Modelos//ENEMY//smallEnemy.obj", "Modelos//ENEMY//lizard_diffuse.bmp", 1);
-		models[3] = thread(loadModA, &Enemy3, "Modelos//ENEMY//redEnemy.obj", "Modelos//ENEMY//inside1.bmp", 1);
-		models[4] = thread(loadModA, &Laptop, "Modelos//Laptop2//Lowpoly Old Notebook.obj", "Modelos//Laptop2//Notebook Color.bmp", 1);
-		models[5] = thread(loadModA, &Telefono, "Modelos//Telefono//10109_Cordless Phone_v2_Iteration2.obj", "Modelos//Telefono//10109_Cordless Phone_v1_Diffuse.bmp", 1);
-		models[6] = thread(loadModA, &Escritorio, "Modelos//Escritorio//Table.obj", "Modelos//Escritorio//Wood_texture.bmp", 1);
-		models[7] = thread(loadModA, &Lamp, "Modelos//Lamp//LampS.obj", "Modelos//Lamp//Diffuse.bmp", 1);
-		models[8] = thread(loadModA, &Extintor, "Modelos//extintor//extintor.obj", "Modelos//extintor//10285_Fire_Extinguisher_v2_difuse.bmp", 1);
-		models[9] = thread(loadModA, &TCone, "Modelos//cone//TrafficCone.obj", "Modelos//cone//DiffuseHigh.bmp", 1);
-		models[10] = thread(loadModA, &Fichero, "Modelos//Fichero//objDocuments.obj", "Modelos//Fichero//color.bmp", 1);
-		models[11] = thread(loadModA, &WTable, "Modelos//desalto_bend//desalto_bend_in_obj.obj", "Modelos//desalto_bend//dcmap_desalto_bend_in_1.bmp", 1);
-		models[12] = thread(loadModA, &Chair, "Modelos//OfficeCH//Office_chair.obj", "Modelos//OfficeCH//Office_chair_plastic_dif.bmp", 1);
-		models[13] = thread(loadModA, &GasCan, "Modelos//Jug1_OBJ//Jug1.obj", "Modelos//Jug1_OBJ//Jug1_c.bmp", 1);
-		models[14] = thread(loadModA, &Building, "Modelos//building//building.obj", "Modelos//building//concrete_building.bmp", 1);
-		models[15] = thread(loadModA, &Tower, "Modelos//Tower//wooden watch tower2.obj", "Modelos//Tower//Wood_Tower_Col.bmp", 1);
-		models[16] = thread(loadModA, &Gate, "Modelos//Gate//Gate.obj", "Modelos//Gate//PLATEOX2copy.bmp", 1);
-		models[17] = thread(loadModA, &Tree, "Modelos//Tree//treeOBJ.obj", "Modelos//Tree//BroadleafBark.bmp", 1);*/
-		/*for (int i = 0; i < 18; i++) {
-			models[i].join();
-		}*/
-
 		vector<thread> threads;
-
-		//threads.push_back(thread(&Scene::loadModel,Guns[i]));
-		//for (int j = 0; j < 199; j++) { threads[j].join(); }
-
 		Billboards(billBoard, hWnd);
-
 		cameraInitialize();
 	}
-
-	void Billboards(Billboard *bills[], HWND hWnd)
-	{
+	void Billboards(Billboard *bills[], HWND hWnd) {
 		//Aqui puedes crear algo util con un FOR quiza.
 	}
-
-	void render(HDC hDC)
-	{
+	void render(HDC hDC) {
 		glMaterialfv(GL_FRONT, GL_AMBIENT, AmbMat);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0, 0, 0, 0);
@@ -152,7 +101,7 @@ public:
 		////AMBIENTES:
 		//Skydome
 		glPushMatrix();
-		glTranslatef(0, 8, 0);
+		glTranslatef(this->px, 8, this->pz);
 		glRotatef(skyRotation, 0, 1, 0);
 		skyDome->Draw();
 		glPopMatrix();
@@ -287,9 +236,7 @@ public:
 		//	glPopMatrix();
 		SwapBuffers(hDC);
 	}
-
-	~Scene()
-	{
+	~Scene() {
 		delete PlayerHands;
 		delete GasCan;
 		delete skyDome;

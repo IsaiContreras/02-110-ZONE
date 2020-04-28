@@ -7,22 +7,18 @@
 #include <windows.h>
 #include <XInput.h> //libreria del Xbox solo gamepads o joysticks compatibles
 // XBOX Controller Class Definition
-class GamePadRR
-{
-
+class GamePadRR {
 private:
     XINPUT_STATE estadoControlador;
     int numeroControlador;
 
 public:
-    GamePadRR(int jugadorNumero)
-	{
+    GamePadRR(int jugadorNumero) {
 		// establece el numero de jugador
 		numeroControlador = jugadorNumero - 1;
 	}
 
-    XINPUT_STATE GetState()
-	{
+    XINPUT_STATE GetState() {
 		// limpia la estructura del estado del gamepad
 		ZeroMemory(&estadoControlador, sizeof(XINPUT_STATE));
 

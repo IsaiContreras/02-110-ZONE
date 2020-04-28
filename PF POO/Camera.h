@@ -5,43 +5,32 @@
 #define ANGLE_INC 3.5
 #define POSITION_INC 1
 
-
 #include "VectorRR.h"
 #include <math.h>
 
-class Camera : public VectorRR
-{
+class Camera : public VectorRR {
 public:
 	VectorRR posc, dirc;
 	GLdouble px, py, pz, dx, dy, dz, ux, uy, uz;
-
 	float angle = 0, dir = 0;
 	float viewVectorMag = 0, magX = 0, magZ = 0;
-
 	bool ableToMove;
 
-	Camera()
-	{
+	Camera(){
 	}
 
-	void cameraInitialize()
-	{
+	void cameraInitialize() {
 		px = 0, py = 23, pz = 0, dx = 0, dy = 23, dz = -25;
 		ux = 0, uy = 1, uz = 0;
 		gluLookAt(px, py, pz, dx, dy, dz, ux, uy, uz);
 		viewVectorMag = sqrt(pow(dx - px, 2) + pow(dz - pz, 2));
 		ableToMove = true;
 	}
-
-	void cameraUpdate()
-	{
+	void cameraUpdate() {
 		gluLookAt(px, py, pz, dx, dy, dz, ux, uy, uz);
 	}
-
-	void move(char movDir)
-	{
+	void move(char movDir) {
 		dir = 0;
-
 		magX = dx - px;
 		magZ = dz - pz;
 
@@ -68,29 +57,21 @@ public:
 			dx += POSITION_INC * cos(TO_RAD(dir));
 		}
 	}
-
-	void turnRight()
-	{
+	void turnRight() {
 		angle = angle + ANGLE_INC;
 		dx = sin(TO_RAD(angle)) * viewVectorMag + px;
 		dz = -cos(TO_RAD(angle)) * viewVectorMag + pz;
 	}
-
-	void turnLeft()
-	{
+	void turnLeft() {
 		angle = angle - ANGLE_INC;
 		dx = sin(TO_RAD(angle)) * viewVectorMag + px;
 		dz = -cos(TO_RAD(angle)) * viewVectorMag + pz;
 	}
-
-	void turnUp()
-	{
+	void turnUp() {
 		if (dy < 50 + py)
 			dy += 1;
 	}
-
-	void turnDown()
-	{
+	void turnDown() {
 		if (dy > -50 + py)
 			dy -= 1;
 	}
